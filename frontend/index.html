@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="TradeAI - Educational Trading AI Agent. Market Analysis, Technical Indicators, and Educational Trends." />
+  <title>TradeAI | Educational Trading AI Agent & Paper Trading</title>
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            dark: {
+              900: '#07090e',
+              800: '#0d111a',
+              700: '#141b27',
+              600: '#1e293b',
+              500: '#334155',
+            },
+            trade: {
+              green: '#10b981',
+              red: '#ef4444',
+              cyan: '#06b6d4',
+              purple: '#8b5cf6',
+              yellow: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body class="bg-dark-900 text-slate-100 antialiased selection:bg-cyan-500 selection:text-black">
+
+  <!-- ========================================================================= -->
+  <!-- 1. NAVBAR                                                                 -->
+  <!-- ========================================================================= -->
+  <header class="border-b border-dark-600/60 bg-dark-800/90 backdrop-blur-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      <!-- Brand -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-500 to-emerald-500 p-0.5 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <div class="w-full h-full bg-dark-800 rounded-[10px] flex items-center justify-center">
+            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
+          </div>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-lg font-bold tracking-tight text-white flex items-center">
+              Trade<span class="text-cyan-400">AI</span>
+            </h1>
+            <span class="bg-cyan-500/10 text-cyan-400 text-[10px] font-semibold px-2 py-0.5 rounded-full border border-cyan-500/20">
+              Live Paper Trading
+            </span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">
+            Simulated Trading & AI Market Analysis
+          </p>
+        </div>
+      </div>
+
+      <!-- Virtual Balance & Status Controls -->
+      <div class="flex items-center space-x-3">
+        <!-- Virtual Cash Balance Pill -->
+        <div class="flex items-center space-x-2 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
+          <i data-lucide="wallet" class="w-4 h-4 text-emerald-400"></i>
+          <div class="text-left">
+            <span class="text-[9px] uppercase tracking-wider text-emerald-400/80 font-bold block leading-none">Virtual Cash</span>
+            <span id="nav-cash-balance" class="font-mono font-bold text-xs sm:text-sm text-emerald-400 leading-none mt-0.5">$100,000.00</span>
+          </div>
+        </div>
+
+        <!-- Trading API Status Pill -->
+        <div id="trading-status-pill" class="hidden sm:flex items-center space-x-1.5 px-2.5 py-1 rounded-lg border text-xs font-medium bg-slate-800 border-slate-700 text-slate-400">
+          <i data-lucide="activity" class="w-3.5 h-3.5"></i>
+          <span class="hidden md:inline">Market API:</span>
+          <span id="trading-status-text">Standby</span>
+        </div>
+
+        <!-- Config Trigger -->
+        <button id="btn-open-config" class="p-2 rounded-lg bg-dark-700 hover:bg-dark-600 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white transition-all shadow-sm flex items-center space-x-1 text-xs" title="Configuration">
+          <i data-lucide="settings" class="w-4 h-4 text-slate-300"></i>
+          <span class="hidden sm:inline font-medium">Config</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 3. MAIN DASHBOARD CONTENT                                                 -->
+  <!-- ========================================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+    <!-- A. MARKET OVERVIEW PANEL -->
+    <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl relative overflow-hidden">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-dark-600/50">
+        <div class="flex items-center space-x-3">
+          <button id="btn-star-symbol" class="p-2 rounded-xl transition-all border bg-dark-700/60 border-slate-700/60 text-slate-400 hover:text-slate-200" title="Add / Remove Watchlist">
+            <i id="star-icon" data-lucide="star" class="w-5 h-5"></i>
+          </button>
+          <div>
+            <div class="flex items-center space-x-2.5">
+              <h2 id="overview-symbol" class="text-2xl font-bold tracking-tight text-white font-mono">
+                BTC/USD
+              </h2>
+              <span id="overview-status-badge" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full border bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                • Live Data
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 mt-0.5">
+              Real-time Market Quote & Paper Trading Execution
+            </p>
+          </div>
+        </div>
+
+        <!-- Symbol Search Bar -->
+        <div class="relative w-full md:w-80">
+          <div class="relative">
+            <i data-lucide="search" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <input
+              type="text"
+              id="input-symbol-search"
+              placeholder="Search ticker (BTC/USD, AAPL, TSLA)..."
+              class="w-full bg-dark-700/90 border border-slate-700/80 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 transition-all font-mono"
+            />
+          </div>
+
+          <!-- Autocomplete Dropdown Menu -->
+          <div id="search-dropdown" class="hidden absolute left-0 right-0 top-full mt-2 bg-dark-800 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-64 overflow-y-auto">
+            <div class="p-1.5 text-[10px] uppercase font-semibold tracking-wider text-slate-400 px-3">
+              Matching Symbols
+            </div>
+            <div id="search-results-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Row -->
+      <div id="metrics-live-container" class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-4 pt-4">
+        <!-- Current Price -->
+        <div class="bg-dark-700/40 border border-dark-600/40 rounded-xl p-3.5">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider block">Current Price</span>
+          <div id="metric-price" class="text-xl sm:text-2xl font-bold font-mono text-white mt-1">--</div>
+        </div>
+
+        <!-- 24h Change -->
+        <div class="bg-dark-700/40 border border-dark-600/40 rounded-xl p-3.5">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider block">24h Change</span>
+          <div id="metric-change" class="text-base sm:text-lg font-bold font-mono text-slate-200 mt-1">--</div>
+        </div>
+
+        <!-- 24h High -->
+        <div class="bg-dark-700/40 border border-dark-600/40 rounded-xl p-3.5">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider block">24h High</span>
+          <div id="metric-high" class="text-base sm:text-lg font-bold font-mono text-slate-200 mt-1">--</div>
+        </div>
+
+        <!-- 24h Low -->
+        <div class="bg-dark-700/40 border border-dark-600/40 rounded-xl p-3.5">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider block">24h Low</span>
+          <div id="metric-low" class="text-base sm:text-lg font-bold font-mono text-slate-200 mt-1">--</div>
+        </div>
+
+        <!-- 24h Volume -->
+        <div class="bg-dark-700/40 border border-dark-600/40 rounded-xl p-3.5 col-span-2 sm:col-span-4 lg:col-span-1">
+          <span class="text-[11px] text-slate-400 font-medium uppercase tracking-wider block">24h Volume</span>
+          <div id="metric-volume" class="text-base sm:text-lg font-bold font-mono text-slate-200 mt-1">--</div>
+        </div>
+      </div>
+
+      <!-- Unavailable Banner -->
+      <div id="metrics-unavailable-banner" class="hidden pt-4 flex items-center justify-between bg-amber-500/5 border border-amber-500/20 rounded-xl p-4 mt-4">
+        <div class="flex items-start space-x-3">
+          <i data-lucide="alert-circle" class="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5"></i>
+          <div>
+            <p id="unavailable-title" class="text-sm font-semibold text-amber-300">
+              Market data unavailable
+            </p>
+            <p id="unavailable-desc" class="text-xs text-slate-400 mt-0.5">
+              Trading API is using offline preview mode.
+            </p>
+          </div>
+        </div>
+        <span class="text-[11px] bg-dark-700 text-slate-300 px-2.5 py-1 rounded-lg border border-slate-600/60 font-mono">
+          Status: Standby
+        </span>
+      </div>
+    </section>
+
+    <!-- B. CHARTS, BUY/SELL ORDER TERMINAL & WATCHLIST GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Left 2 Cols: Chart & Technical Indicators -->
+      <div class="lg:col-span-2 space-y-6">
+        <!-- Interactive Chart -->
+        <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl flex flex-col">
+          <!-- Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-dark-600/50">
+            <div class="flex items-center space-x-2">
+              <!-- Candles vs Line -->
+              <div class="bg-dark-700/80 p-1 rounded-lg border border-slate-700/80 flex items-center space-x-1">
+                <button id="btn-chart-candles" class="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center space-x-1 bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 transition-all">
+                  <i data-lucide="bar-chart-2" class="w-3.5 h-3.5"></i>
+                  <span>Candles</span>
+                </button>
+                <button id="btn-chart-line" class="px-2.5 py-1 rounded-md text-xs font-semibold flex items-center space-x-1 text-slate-400 hover:text-slate-200 transition-all">
+                  <i data-lucide="line-chart" class="w-3.5 h-3.5"></i>
+                  <span>Line</span>
+                </button>
+              </div>
+
+              <!-- Timeframes -->
+              <div class="bg-dark-700/80 p-1 rounded-lg border border-slate-700/80 flex items-center space-x-1">
+                <button class="btn-timeframe px-2 py-1 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-slate-200" data-tf="1D">1D</button>
+                <button class="btn-timeframe px-2 py-1 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-slate-200" data-tf="1W">1W</button>
+                <button class="btn-timeframe px-2 py-1 rounded-md text-xs font-mono font-bold bg-dark-600 text-white border border-slate-600" data-tf="1M">1M</button>
+                <button class="btn-timeframe px-2 py-1 rounded-md text-xs font-mono font-medium text-slate-400 hover:text-slate-200" data-tf="1Y">1Y</button>
+              </div>
+            </div>
+
+            <!-- Overlays -->
+            <div class="flex items-center space-x-2 text-xs">
+              <button id="btn-toggle-sma20" class="px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 bg-amber-500/10 border-amber-500/40 text-amber-400 font-semibold transition-all">
+                <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+                <span>SMA 20</span>
+              </button>
+              <button id="btn-toggle-sma50" class="px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 bg-purple-500/10 border-purple-500/40 text-purple-400 font-semibold transition-all">
+                <span class="w-2 h-2 rounded-full bg-purple-400 inline-block"></span>
+                <span>SMA 50</span>
+              </button>
+              <button id="btn-toggle-vol" class="px-2.5 py-1 rounded-lg border flex items-center space-x-1.5 bg-emerald-500/10 border-emerald-500/40 text-emerald-400 font-semibold transition-all">
+                <i data-lucide="layers" class="w-3 h-3"></i>
+                <span>Volume</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Hover Tooltip Stats Header -->
+          <div id="chart-hover-header" class="h-7 py-1 flex items-center justify-between text-xs font-mono text-slate-400 border-b border-dark-700/30">
+            <span class="text-[11px] text-slate-500 flex items-center space-x-1.5">
+              <i data-lucide="info" class="w-3.5 h-3.5"></i>
+              <span>Hover over candlestick data to inspect OHLC values</span>
+            </span>
+            <span class="text-[10px] text-emerald-400/90 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+              Interactive Chart Active
+            </span>
+          </div>
+
+          <!-- Canvas Container -->
+          <div class="relative w-full mt-2 cursor-crosshair">
+            <canvas id="trading-canvas" class="w-full rounded-xl bg-dark-900 border border-slate-800/80 shadow-inner h-[360px]"></canvas>
+          </div>
+        </section>
+
+        <!-- Technical Indicators Panel -->
+        <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl">
+          <div class="flex items-center justify-between pb-3 border-b border-dark-600/50 mb-4">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="activity" class="w-5 h-5 text-cyan-400"></i>
+              <h3 class="font-bold text-white text-base">Technical Indicator Gauges</h3>
+            </div>
+            <span class="text-[11px] bg-dark-700 text-slate-400 px-2 py-0.5 rounded border border-slate-700 font-mono">
+              Auto-Calculated
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- RSI (14) -->
+            <div class="bg-dark-700/40 border border-dark-600/50 rounded-xl p-3.5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400 font-medium">RSI (14-Period)</span>
+                <span id="ind-rsi-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400">
+                  Neutral (52.4)
+                </span>
+              </div>
+              <div class="my-2">
+                <div id="ind-rsi-value" class="text-2xl font-bold font-mono text-white">52.4</div>
+                <div class="w-full bg-dark-900 h-2 rounded-full mt-2 relative overflow-hidden border border-slate-800">
+                  <div id="ind-rsi-bar" class="h-full bg-cyan-500 transition-all duration-500" style="width: 52.4%;"></div>
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">
+                Above 70 indicates overbought; below 30 indicates oversold conditions.
+              </p>
+            </div>
+
+            <!-- Trend State -->
+            <div class="bg-dark-700/40 border border-dark-600/50 rounded-xl p-3.5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400 font-medium">Trend State</span>
+                <span id="ind-trend-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400">
+                  Bullish Trend
+                </span>
+              </div>
+              <div class="my-2 flex items-center space-x-2">
+                <i id="ind-trend-icon" data-lucide="trending-up" class="w-7 h-7 text-emerald-400"></i>
+                <div id="ind-trend-text" class="font-mono text-lg font-bold text-white">Bullish</div>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">
+                Calculated from SMA 20 vs SMA 50 alignment and current price action.
+              </p>
+            </div>
+
+            <!-- Support & Resistance -->
+            <div class="bg-dark-700/40 border border-dark-600/50 rounded-xl p-3.5 flex flex-col justify-between">
+              <span class="text-xs text-slate-400 font-medium">Key Price Levels</span>
+              <div class="my-2 space-y-1.5 font-mono text-xs">
+                <div class="flex items-center justify-between bg-dark-800/80 px-2 py-1 rounded border border-rose-500/20">
+                  <span class="text-rose-400 font-semibold text-[11px]">Resistance:</span>
+                  <span id="ind-resistance-val" class="text-white font-bold">$68,500.00</span>
+                </div>
+                <div class="flex items-center justify-between bg-dark-800/80 px-2 py-1 rounded border border-emerald-500/20">
+                  <span class="text-emerald-400 font-semibold text-[11px]">Support:</span>
+                  <span id="ind-support-val" class="text-white font-bold">$62,100.00</span>
+                </div>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">
+                Historical floors where buyers entered and ceilings where selling emerged.
+              </p>
+            </div>
+
+            <!-- Volatility & Risk -->
+            <div class="bg-dark-700/40 border border-dark-600/50 rounded-xl p-3.5 flex flex-col justify-between">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400 font-medium">Volatility (14D)</span>
+                <span id="ind-vol-badge" class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-500/20 text-purple-400">
+                  Normal Range
+                </span>
+              </div>
+              <div class="my-2 font-mono">
+                <div id="ind-vol-val" class="text-2xl font-bold text-white">2.4%</div>
+                <div class="text-[10px] text-slate-400 mt-0.5">Typical daily price swing</div>
+              </div>
+              <p class="text-[10px] text-slate-400 leading-tight">
+                Higher volatility warrants smaller position sizing and disciplined stop-loss rules.
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right 1 Col: BUY & SELL ORDER TERMINAL & WATCHLIST -->
+      <div class="lg:col-span-1 space-y-6">
+        <!-- BUY & SELL ORDER TERMINAL -->
+        <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-dark-600/50">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="arrow-left-right" class="w-5 h-5 text-cyan-400"></i>
+              <h3 class="font-bold text-white text-base">Trade Terminal</h3>
+            </div>
+            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded font-mono font-semibold">
+              Paper Demo
+            </span>
+          </div>
+
+          <!-- Buy / Sell Mode Tabs -->
+          <div class="grid grid-cols-2 gap-2 mt-4">
+            <button id="btn-trade-buy-mode" class="py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all bg-emerald-600 text-white shadow-lg shadow-emerald-600/30 border border-emerald-500">
+              <i data-lucide="trending-up" class="w-4 h-4"></i>
+              <span>BUY</span>
+            </button>
+            <button id="btn-trade-sell-mode" class="py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center justify-center space-x-1.5 transition-all bg-dark-700/60 text-slate-400 hover:text-rose-300 border border-slate-700/60">
+              <i data-lucide="trending-down" class="w-4 h-4"></i>
+              <span>SELL</span>
+            </button>
+          </div>
+
+          <!-- Order Execution Form -->
+          <form id="form-trade-order" class="mt-4 space-y-3.5">
+            <!-- Asset & Price Info -->
+            <div class="bg-dark-700/50 rounded-xl p-3 border border-dark-600/50 flex items-center justify-between text-xs font-mono">
+              <div>
+                <span class="text-slate-400 text-[10px] block">Trading Asset</span>
+                <strong id="trade-asset-symbol" class="text-white text-sm">BTC/USD</strong>
+              </div>
+              <div class="text-right">
+                <span class="text-slate-400 text-[10px] block">Execution Price</span>
+                <strong id="trade-exec-price" class="text-cyan-400 text-sm">$67,450.00</strong>
+              </div>
+            </div>
+
+            <!-- Quantity Input -->
+            <div>
+              <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
+                <label for="input-trade-qty" class="font-medium">Quantity (Units)</label>
+                <span class="text-[11px] font-mono">Owned: <strong id="trade-owned-qty" class="text-white">0.00</strong></span>
+              </div>
+              <div class="relative">
+                <input
+                  type="number"
+                  step="any"
+                  min="0.0001"
+                  id="input-trade-qty"
+                  placeholder="0.00"
+                  class="w-full bg-dark-700 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white font-mono focus:outline-none focus:border-cyan-500 transition-all"
+                  required
+                />
+              </div>
+            </div>
+
+            <!-- Quick Percent Buttons -->
+            <div class="grid grid-cols-4 gap-1.5 text-xs font-mono">
+              <button type="button" class="btn-trade-pct py-1 bg-dark-700 hover:bg-dark-600 border border-slate-700 text-slate-300 rounded-lg" data-pct="25">25%</button>
+              <button type="button" class="btn-trade-pct py-1 bg-dark-700 hover:bg-dark-600 border border-slate-700 text-slate-300 rounded-lg" data-pct="50">50%</button>
+              <button type="button" class="btn-trade-pct py-1 bg-dark-700 hover:bg-dark-600 border border-slate-700 text-slate-300 rounded-lg" data-pct="75">75%</button>
+              <button type="button" class="btn-trade-pct py-1 bg-dark-700 hover:bg-dark-600 border border-slate-700 text-slate-300 rounded-lg" data-pct="100">100%</button>
+            </div>
+
+            <!-- Order Total Estimation -->
+            <div class="bg-dark-800/80 rounded-xl p-3 border border-slate-800 flex items-center justify-between text-xs font-mono">
+              <span class="text-slate-400">Estimated Total</span>
+              <strong id="trade-total-cost" class="text-white text-base">$0.00</strong>
+            </div>
+
+            <!-- Trade Order Alerts (Success / Error) -->
+            <div id="trade-alert-msg" class="hidden text-[11px] p-2.5 rounded-xl border"></div>
+
+            <!-- Action Button -->
+            <button
+              type="submit"
+              id="btn-submit-trade"
+              class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-emerald-600/30 flex items-center justify-center space-x-2"
+            >
+              <i data-lucide="check-circle" class="w-4 h-4"></i>
+              <span id="btn-submit-trade-text">Place Simulated BUY Order</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- Watchlist Sidebar -->
+        <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl flex flex-col">
+          <div class="flex items-center justify-between pb-3 border-b border-dark-600/50">
+            <div class="flex items-center space-x-2">
+              <i data-lucide="bookmark" class="w-5 h-5 text-amber-400"></i>
+              <h3 class="font-bold text-white text-base">Watchlist</h3>
+            </div>
+            <span id="watchlist-count-badge" class="text-xs bg-dark-700 text-slate-400 px-2 py-0.5 rounded-full font-mono">
+              5 items
+            </span>
+          </div>
+
+          <!-- Add Symbol Form -->
+          <form id="form-add-watchlist" class="mt-4 flex gap-2">
+            <input
+              type="text"
+              id="input-add-watchlist"
+              placeholder="Add ticker (e.g. ETH/USD)..."
+              class="w-full bg-dark-700 border border-slate-700 rounded-xl px-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 font-mono uppercase focus:outline-none focus:border-cyan-500"
+            />
+            <button
+              type="submit"
+              class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-xl flex items-center space-x-1 transition-all shadow-md shadow-cyan-600/20 flex-shrink-0"
+            >
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>Add</span>
+            </button>
+          </form>
+
+          <div id="watchlist-error-msg" class="hidden mt-2 text-[11px] text-rose-400 flex items-center space-x-1 bg-rose-500/10 p-2 rounded-lg border border-rose-500/20">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 flex-shrink-0"></i>
+            <span id="watchlist-error-text"></span>
+          </div>
+
+          <!-- Watchlist Items Container -->
+          <div id="watchlist-items-container" class="mt-4 space-y-2 overflow-y-auto max-h-[220px] pr-1 flex-1">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- C. VIRTUAL PORTFOLIO & HOLDINGS SECTION -->
+    <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-dark-600/50">
+        <div class="flex items-center space-x-3">
+          <div class="w-9 h-9 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-cyan-400"></i>
+          </div>
+          <div>
+            <h3 class="font-bold text-white text-base">Virtual Portfolio & Active Positions</h3>
+            <p class="text-xs text-slate-400">Track demo holdings, average buy price, and unrealized profit & loss</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-3">
+          <div class="text-right font-mono">
+            <span class="text-[10px] text-slate-400 block">Total Portfolio Value</span>
+            <span id="portfolio-total-val" class="text-lg font-bold text-white">$100,000.00</span>
+          </div>
+          <button id="btn-reset-portfolio" class="px-3 py-1.5 rounded-lg bg-dark-700 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 border border-slate-700 hover:border-rose-500/40 text-xs transition-colors" title="Reset to $100k Cash">
+            Reset Account
+          </button>
+        </div>
+      </div>
+
+      <!-- Holdings Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-mono">
+          <thead class="bg-dark-800/80 text-slate-400 border-b border-dark-700">
+            <tr>
+              <th class="py-2.5 px-3">Asset</th>
+              <th class="py-2.5 px-3">Quantity</th>
+              <th class="py-2.5 px-3">Avg Buy Price</th>
+              <th class="py-2.5 px-3">Current Price</th>
+              <th class="py-2.5 px-3">Market Value</th>
+              <th class="py-2.5 px-3">Unrealized P&L</th>
+              <th class="py-2.5 px-3 text-right">Quick Action</th>
+            </tr>
+          </thead>
+          <tbody id="portfolio-holdings-body" class="divide-y divide-dark-700/50 text-slate-200">
+            <tr>
+              <td colspan="7" class="py-6 text-center text-slate-500 font-sans">
+                No active holdings yet. Place a BUY order in the Trade Terminal above!
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- D. AI ANALYSIS & CHAT SECTION -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
+      <!-- AI Analysis Panel -->
+      <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl flex flex-col">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-dark-600/50">
+          <div class="flex items-center space-x-3">
+            <div class="w-9 h-9 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-center justify-center">
+              <i data-lucide="bot" class="w-5 h-5 text-purple-400"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <h3 class="font-bold text-white text-base">AI Educational Market Analysis</h3>
+                <span id="analysis-model-badge" class="bg-purple-500/10 text-purple-300 text-[10px] font-mono px-2 py-0.5 rounded border border-purple-500/20">
+                  deepseek-ai/DeepSeek-OCR
+                </span>
+              </div>
+              <p class="text-xs text-slate-400">
+                Structured breakdowns covering market structure, scenarios, and risk parameters
+              </p>
+            </div>
+          </div>
+
+          <button id="btn-run-analysis" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white text-xs font-bold rounded-xl flex items-center justify-center space-x-2 transition-all shadow-lg shadow-purple-600/20 flex-shrink-0">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <span id="btn-analysis-text">Analyze Asset</span>
+          </button>
+        </div>
+
+        <!-- Analysis Type Tabs -->
+        <div class="flex flex-wrap gap-2 pt-4 pb-2">
+          <button class="btn-analysis-tab px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 bg-purple-500/20 text-purple-300 border border-purple-500/40" data-tab="full">
+            <i data-lucide="compass" class="w-3.5 h-3.5"></i>
+            <span>Full Breakdown</span>
+          </button>
+          <button class="btn-analysis-tab px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 bg-dark-700/60 text-slate-400 border border-slate-700/50 hover:bg-dark-700 hover:text-slate-200" data-tab="trend">
+            <i data-lucide="bar-chart" class="w-3.5 h-3.5"></i>
+            <span>Trend & Structure</span>
+          </button>
+          <button class="btn-analysis-tab px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 bg-dark-700/60 text-slate-400 border border-slate-700/50 hover:bg-dark-700 hover:text-slate-200" data-tab="support_resistance">
+            <i data-lucide="target" class="w-3.5 h-3.5"></i>
+            <span>Support & Resistance</span>
+          </button>
+          <button class="btn-analysis-tab px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 bg-dark-700/60 text-slate-400 border border-slate-700/50 hover:bg-dark-700 hover:text-slate-200" data-tab="technical">
+            <i data-lucide="help-circle" class="w-3.5 h-3.5"></i>
+            <span>Indicator Deep-Dive</span>
+          </button>
+          <button class="btn-analysis-tab px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1.5 bg-dark-700/60 text-slate-400 border border-slate-700/50 hover:bg-dark-700 hover:text-slate-200" data-tab="risk">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+            <span>Risk Management</span>
+          </button>
+        </div>
+
+        <!-- Analysis Content Output Container -->
+        <div id="analysis-content-area" class="mt-3 min-h-[220px] flex-1 flex flex-col justify-center">
+          <div class="text-center py-10 px-4 bg-dark-800/40 rounded-xl border border-dashed border-slate-700/60">
+            <i data-lucide="bot" class="w-10 h-10 text-purple-400/60 mx-auto mb-2"></i>
+            <p class="text-sm font-semibold text-slate-300">Ready to Analyze Market Data</p>
+            <p class="text-xs text-slate-400 max-w-md mx-auto mt-1">
+              Click <strong>Analyze Asset</strong> above to request an educational breakdown covering market structure, trend trajectory, scenarios, and risk parameters.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Interactive AI Chat Assistant -->
+      <section class="glass-panel rounded-2xl p-5 border border-dark-600/60 shadow-xl flex flex-col h-[520px]">
+        <div class="flex items-center justify-between pb-3 border-b border-dark-600/50">
+          <div class="flex items-center space-x-2.5">
+            <div class="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center">
+              <i data-lucide="bot" class="w-4 h-4 text-cyan-400"></i>
+            </div>
+            <div>
+              <h3 class="font-bold text-white text-sm">Interactive AI Chat Assistant</h3>
+              <span class="text-[11px] text-slate-400">
+                Active Context: <strong id="chat-active-symbol" class="text-cyan-400 font-mono">BTC/USD</strong>
+              </span>
+            </div>
+          </div>
+
+          <button id="btn-clear-chat" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-dark-700 transition-colors text-xs flex items-center space-x-1" title="Reset Conversation">
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span class="hidden sm:inline">Clear</span>
+          </button>
+        </div>
+
+        <!-- Chat Feed -->
+        <div id="chat-messages-container" class="flex-1 overflow-y-auto py-4 space-y-3.5 pr-2">
+          <!-- Initial Welcome Message -->
+          <div class="flex items-start space-x-2.5 justify-start">
+            <div class="w-7 h-7 rounded-lg bg-purple-500/20 border border-purple-500/30 flex items-center justify-center flex-shrink-0 mt-0.5">
+              <i data-lucide="bot" class="w-3.5 h-3.5 text-purple-400"></i>
+            </div>
+            <div class="max-w-[85%] rounded-2xl px-4 py-3 text-xs leading-relaxed bg-dark-700/80 border border-slate-700/60 text-slate-200 rounded-tl-none whitespace-pre-wrap">Hello! I am your Educational Trading AI Assistant. 🎓
+
+I can help explain market trends, technical indicators (RSI, Moving Averages), support & resistance, volatility, and risk management.
+
+Ask me any question or click one of the quick prompts below!</div>
+          </div>
+        </div>
+
+        <!-- Quick Question Chips -->
+        <div class="py-2 border-t border-dark-700/50">
+          <div class="text-[10px] uppercase tracking-wider text-slate-500 font-semibold mb-1.5 flex items-center space-x-1">
+            <i data-lucide="sparkles" class="w-3 h-3 text-amber-400"></i>
+            <span>Quick Educational Questions</span>
+          </div>
+          <div class="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar">
+            <button class="btn-quick-prompt px-2.5 py-1 bg-dark-700/60 hover:bg-dark-700 text-slate-300 hover:text-cyan-300 border border-slate-700/60 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0">Analyze this market</button>
+            <button class="btn-quick-prompt px-2.5 py-1 bg-dark-700/60 hover:bg-dark-700 text-slate-300 hover:text-cyan-300 border border-slate-700/60 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0">Explain the current trend</button>
+            <button class="btn-quick-prompt px-2.5 py-1 bg-dark-700/60 hover:bg-dark-700 text-slate-300 hover:text-cyan-300 border border-slate-700/60 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0">What indicators are visible?</button>
+            <button class="btn-quick-prompt px-2.5 py-1 bg-dark-700/60 hover:bg-dark-700 text-slate-300 hover:text-cyan-300 border border-slate-700/60 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0">Explain support and resistance</button>
+            <button class="btn-quick-prompt px-2.5 py-1 bg-dark-700/60 hover:bg-dark-700 text-slate-300 hover:text-cyan-300 border border-slate-700/60 rounded-lg text-[11px] whitespace-nowrap transition-all flex-shrink-0">Explain risk management</button>
+          </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <form id="form-chat" class="mt-2 flex items-center space-x-2">
+          <input
+            type="text"
+            id="input-chat-message"
+            placeholder="Ask about indicators, trend, or risk management..."
+            class="flex-1 bg-dark-700 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-all font-sans"
+          />
+          <button
+            type="submit"
+            id="btn-chat-send"
+            class="p-2.5 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl transition-all shadow-md shadow-cyan-600/20 flex items-center justify-center flex-shrink-0"
+          >
+            <i data-lucide="send" class="w-4 h-4"></i>
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- 4. FOOTER                                                                 -->
+  <!-- ========================================================================= -->
+  <footer class="border-t border-dark-600/60 bg-dark-800/80 py-6 mt-12 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-2">
+      <p class="text-slate-400">
+        <strong>Educational Trading AI Agent</strong> • Simulated Paper Trading & AI Market Analysis.
+      </p>
+      <p class="text-[11px] text-slate-500 max-w-2xl mx-auto">
+        Disclaimer: This platform is developed strictly for educational simulation and practice. It does not risk or manage real financial funds.
+      </p>
+    </div>
+  </footer>
+
+  <!-- ========================================================================= -->
+  <!-- 5. CONFIGURATION & ENVIRONMENT SETUP MODAL                                -->
+  <!-- ========================================================================= -->
+  <div id="config-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+    <div class="bg-dark-800 border border-slate-700 w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-dark-600 flex items-center justify-between bg-dark-700/50">
+        <div class="flex items-center space-x-2.5">
+          <i data-lucide="key" class="w-5 h-5 text-cyan-400"></i>
+          <h3 class="font-bold text-white text-lg">System Configuration & API Setup</h3>
+        </div>
+        <button id="btn-close-config" class="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-dark-600 transition-colors">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Body -->
+      <div class="p-6 space-y-6 overflow-y-auto">
+        <!-- Status Badges -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- AI Provider Status -->
+          <div id="modal-ai-status-card" class="p-4 rounded-xl border flex items-start space-x-3 bg-amber-500/10 border-amber-500/30 text-amber-300">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-amber-400 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h4 class="font-bold text-sm">AI Model Provider</h4>
+              <p id="modal-ai-status-desc" class="text-xs mt-1 text-slate-300">
+                AI API Key is missing or using placeholder.
+              </p>
+              <div class="text-[11px] font-mono mt-1 text-purple-300">
+                Model: <span id="modal-model-name">deepseek-ai/DeepSeek-OCR</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Trading API Status -->
+          <div id="modal-trading-status-card" class="p-4 rounded-xl border flex items-start space-x-3 bg-emerald-500/10 border-emerald-500/30 text-emerald-300">
+            <i data-lucide="check-circle-2" class="w-5 h-5 text-emerald-400 mt-0.5 flex-shrink-0"></i>
+            <div>
+              <h4 class="font-bold text-sm text-slate-200">Trading Market Data API</h4>
+              <p id="modal-trading-status-desc" class="text-xs mt-1 text-slate-300">
+                Connected to Alpha Vantage API.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="bg-dark-900/90 rounded-xl p-4 border border-slate-800 space-y-3">
+          <h4 class="font-semibold text-white text-sm flex items-center space-x-2">
+            <i data-lucide="database" class="w-4 h-4 text-cyan-400"></i>
+            <span>How to Configure Environment Variables</span>
+          </h4>
+          <p class="text-xs text-slate-300 leading-relaxed">
+            Open the root <code class="bg-dark-700 px-1.5 py-0.5 rounded text-amber-300 font-mono">.env</code> file in your editor and add your API credentials:
+          </p>
+          <pre class="bg-dark-800 p-3.5 rounded-lg text-xs font-mono text-cyan-300 border border-slate-700/80 overflow-x-auto">
+# 1. Trading API Settings
+TRADING_API_KEY=HUO0K9FKFVTVI4BU
+TRADING_BASE_URL=https://www.alphavantage.co/query
+
+# 2. AI Model Settings (OpenAI-Compatible)
+MODEL_NAME=deepseek-ai/DeepSeek-OCR
+AI_API_KEY=your_openai_or_deepseek_api_key
+AI_API_BASE_URL=https://api.openai.com/v1</pre>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-3.5 border-t border-dark-600 bg-dark-700/30 flex justify-end">
+        <button id="btn-close-config-footer" class="px-4 py-2 bg-dark-600 hover:bg-dark-500 text-white text-xs font-semibold rounded-xl transition-colors">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- JavaScript Logic -->
+  <script src="./app.js"></script>
+</body>
+</html>
