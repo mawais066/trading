@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: trading-ai-agent
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: MODEL_NAME
+        value: deepseek-ai/DeepSeek-OCR
+      - key: AI_API_BASE_URL
+        value: https://api.openai.com/v1
+      - key: AI_API_KEY
+        sync: false
+      - key: TRADING_API_KEY
+        sync: false
+      - key: TRADING_BASE_URL
+        sync: false
