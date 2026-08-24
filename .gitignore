@@ -3,7 +3,6 @@
 .env.local
 .env.*.local
 *.env
-portfolio.json
 watchlist.json
 
 # Python

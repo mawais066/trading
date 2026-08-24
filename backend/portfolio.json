@@ -1,0 +1,40 @@
+{
+  "cash_balance": 41313.28,
+  "initial_capital": 100000.0,
+  "holdings": {
+    "ETH/USD": {
+      "quantity": 24.0,
+      "avg_price": 2445.28,
+      "total_invested": 58686.72
+    }
+  },
+  "order_history": [
+    {
+      "id": "ORD-1787551486156",
+      "symbol": "BTC/USD",
+      "order_type": "BUY",
+      "quantity": 0.1,
+      "price": 77183.16,
+      "total_value": 7718.32,
+      "timestamp": "2026-08-24 06:04:46 UTC"
+    },
+    {
+      "id": "ORD-1787551497596",
+      "symbol": "BTC/USD",
+      "order_type": "SELL",
+      "quantity": 0.1,
+      "price": 77183.16,
+      "total_value": 7718.32,
+      "timestamp": "2026-08-24 06:04:57 UTC"
+    },
+    {
+      "id": "ORD-1787551544478",
+      "symbol": "ETH/USD",
+      "order_type": "BUY",
+      "quantity": 24.0,
+      "price": 2445.28,
+      "total_value": 58686.72,
+      "timestamp": "2026-08-24 06:05:44 UTC"
+    }
+  ]
+}
